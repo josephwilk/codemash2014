@@ -40,5 +40,6 @@ Y8a     a8P  '8a,   ,a8'  '8a,   ,a88  88       88  '8a,   ,d88
 (defonce welcome-sample (load-sample "~/Workspace/music/samples/welcome to sound.wav"))
 (def welcome (sample-player welcome-sample :rate 1 :amp 1 :loop? 1 :start-pos 0))
 (ctl welcome :loop? 1 :rate -1 :start-pos (:size welcome-sample))
+(ctl welcome :loop? 1 :rate 0.5 :start-pos 0)
 (ctl welcome :loop? 0 :rate 2 :start-pos 0)
 (stop)
