@@ -4,4 +4,16 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [overtone "0.9.1"]])
+                 [overtone "0.9.1"]
+                 [polynome "0.3.0-SNAPSHOT"]]
+
+  :jvm-opts ^:replace ["-Xms512m" "-Xmx1g"
+                       "-XX:+UseParNewGC"
+                       "-XX:+UseConcMarkSweepGC"
+                       "-XX:+CMSConcurrentMTEnabled"
+                       "-XX:MaxGCPauseMillis=20"
+                       "-XX:+CMSIncrementalMode"
+                       "-XX:MaxNewSize=257m"
+                       "-XX:NewSize=256m"
+                       "-XX:+UseTLAB"
+                       "-XX:MaxTenuringThreshold=0"])
