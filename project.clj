@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [overtone "0.9.1"]
+                 [incanter "1.5.4"]
                  [polynome "0.3.0-SNAPSHOT"]]
 
   :jvm-opts ^:replace ["-Xms512m" "-Xmx1g"

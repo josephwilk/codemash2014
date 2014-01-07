@@ -12,7 +12,8 @@
     * Manupliate instruments live
     * Maybe Music?
 "
-  (:use overtone.live))
+  (:use overtone.live)
+  (:require [codemash.graphs :as graph]))
 
 (use 'overtone.live)
 (odoc demo)
@@ -29,8 +30,6 @@
 (demo (square))
 (demo (lf-tri))
 
-(graph/plot-harmonics sin-osc "Sin")
-
 ;;Synthesis
 ;; Turning waves into complex sounds.
 ;; * Additive
@@ -43,7 +42,7 @@
         sin2 (sin-osc freq)
         sin3 (* 0.9 (sin-osc freq))
         src (mix [sin1 sin2 sin3])]
-    (out [0] (pan2 src))))
+    (out 0 (* amp (pan2 src)))))
 
 (def p (pop))
 
@@ -106,15 +105,6 @@
     (kill mft)
     (kill mvt)))
 
-(comment
-  (do
-    (ctl tri-synth-inst :freq 5)
-    (ctl sin-synth-inst :freq 5)
-    (def mft-2 (modulated-freq-tri [:tail lateroot-g] sin-bus 220 55))
-    (def mft-3 (modulated-freq-tri [:tail lateroot-g] tri-bus 220 55)))
-  (ctl sin-synth-inst :freq 4)
-  (kill mft-2 mft-3))
-
 ;;;;;;;;;;;;;;;
 ;;Instruments;;
 ;;;;;;;;;;;;;;;
@@ -160,36 +150,33 @@
 
 (get-beat)
 
-(on-trigger count-trigger-id (fn [x] (println x) (flush)) ::beat-watch)
 
-(ctl beat-trigger :div 30)
-(ctl root-trigger :rate 1)
+(require '[overtone.inst.drum :as drum])
+(on-trigger count-trigger-id (fn [x] (drum/kick)) ::beat-watch)
+
+(ctl beat-trigger :div 60)
+(ctl root-trigger :rate 100)
 
 (comment (remove-event-handler ::beat-watch))
+
+;; Timing and Buffers
 
 (require '[codemash.timing :as time])
 
 (defonce rhythm-g (group "Rhythm" :after time/timing-g))
+(defonce music-buffer (buffer 256))
 
-(defonce music-buffer-1 (buffer 256))
-(defonce music-buffer-2 (buffer 256))
-
-(def phasor-b1 (control-bus))
-(def phasor-b2 (control-bus))
-
-(defonce saw-x-b1 (control-bus 1 "Timing Saw 1"))
-(defonce saw-x-b2 (control-bus 1 "Timing Saw 2"))
-(defonce saw-x-b3 (control-bus 1 "Timing Saw 3"))
+(def phasor-b (control-bus))
+(def saw-x-b1 (control-bus))
+(def saw-x-b2 (control-bus))
 
 (defonce saw-s1 (time/saw-x [:head rhythm-g] :out-bus saw-x-b1))
 (defonce saw-s2 (time/saw-x [:head rhythm-g] :out-bus saw-x-b2))
-(defonce saw-s3 (time/saw-x [:head rhythm-g] :out-bus saw-x-b3))
 
-(defonce phasor-s1 (time/buf-phasor [:after saw-s1] saw-x-b1 :out-bus phasor-b1 :buf music-buffer-1))
-(defonce phasor-s2 (time/buf-phasor [:after saw-s2] saw-x-b2 :out-bus phasor-b2 :buf music-buffer-2))
+(def phasor-s (time/buf-phasor [:after saw-s1] saw-x-b1 :out-bus phasor-b :buf music-buffer))
 
-(defsynth foo [attack 0.01 sustain 0.03 release 0.1 amp 0.8 out-bus 0]
-  (let [freq (/ (in:kr phasor-b2) 2)
+(defsynth fuzzy-beep [attack 0.01 sustain 0.03 release 0.1 amp 0.8 out-bus 0]
+  (let [freq (/ (in:kr phasor-b) 2)
         env  (env-gen (env-lin attack sustain release) 1 1 0 1)
         src  (mix (saw [freq (* 1.01 freq)]))
         src  (lpf src (mouse-y 100 20000))
@@ -199,41 +186,29 @@
     (out out-bus (pan2 (* src amp)))))
 
 (defsynth beepy [amp 1 out-bus 0]
-  (let [freq   (* (in:kr phasor-b2) 1)
-        ct-saw (+ (lin-lin (in:kr saw-x-b3) 0 1 0.5 1))]
+  (let [freq   (* (in:kr phasor-b) 1)
+        ct-saw (+ (lin-lin (in:kr saw-x-b2) 0 1 0.5 1))]
     (out out-bus (* 0.5  ct-saw amp 1.25 (mix (+ (lf-tri [(* 0.5 freq)
                                                           (* 0.25 freq)
                                                           (* 0.5 freq)
                                                           (* 2.01 freq)])))))))
 
-(defsynth foo-bass [lpf-f 1000 lpf-mul 1 amp 0 out-bus 0]
-  (let [freq (/ (in:kr phasor-b1) 8)
-        ct-saw (in:kr saw-x-b3)]
-    (out out-bus (* amp (* 0.5 (* (+ 0.2 ct-saw)
-                                  (lpf (sum [(sin-osc (/ freq))
-                                             (sin-osc (/ freq 0.25))
-                                             (square (* 2 freq))
-                                             (saw freq)])
-                                       (* lpf-mul ct-saw lpf-f))))))))
+(def hi   (beepy      [:head rhythm-g] :amp 0 :out-bus 0))
+(def mid  (fuzzy-beep [:head rhythm-g] :amp 0 :out-bus 0))
 
-(def hi   (beepy    [:head rhythm-g] :amp 0 :out-bus 0))
-(def mid  (foo      [:head rhythm-g] :amp 0 :out-bus 0))
-(def bass (foo-bass [:head rhythm-g] :amp 0 :out-bus 0))
+(def score (map note [:C5 :A3 :B4 :A3 :C5 :E5 :A3 :A4 :C5 :A3 :B4 :A3 :C5 :A4]))
 
-(def score (map note [:C5, :A3, :B4, :A3, :C5, :E5, :A3, :A4, :C5, :A3, :B4, :A3, :C5, :A4]))
+(buffer-write! music-buffer (take 256 (cycle (map midi->hz codemash.score/score))))
 
-(buffer-write! music-buffer-1 (take 256 (cycle score)))
-(buffer-write! music-buffer-2 (take 256 (cycle score)))
-(ctl time/root-s :rate 100)
+(ctl time/root-s :rate 1/32)
 
 (ctl hi :amp 1)
 (ctl mid :amp 1)
-(ctl bass :amp 1)
 
 (kill hi)
 (kill mid)
-(kill bass)
 (stop)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Creating a Sequencer;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
