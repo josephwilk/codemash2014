@@ -317,7 +317,6 @@
 
 (buffer-write! shake1-sequencer-buffer [0 0 0 0 1 0 0 0])
 
-(stop)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Timing AND Buffers;;
@@ -390,7 +389,9 @@
 (ctl root-trigger :rate 100)
 (ctl beat-trigger :div 30)
 
-;;Hardware (External devices)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Hardware (External devices);;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (midi-connected-devices)
 
