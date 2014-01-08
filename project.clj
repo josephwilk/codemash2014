@@ -6,7 +6,9 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [overtone "0.9.1"]
                  [incanter "1.5.4"]
-                 [polynome "0.3.0-SNAPSHOT"]]
+                 [polynome "0.3.0-SNAPSHOT"]
+                 [korg-nano-kontrol2 "0.1.0-SNAPSHOT"]
+                 [launchpad "0.1.0-SNAPSHOT"]]
 
   :jvm-opts ^:replace ["-Xms512m" "-Xmx1g"
                        "-XX:+UseParNewGC"

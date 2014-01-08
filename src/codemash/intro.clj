@@ -43,4 +43,4 @@ Y8a     a8P  '8a,   ,a8'  '8a,   ,a88  88       88  '8a,   ,d88
 (ctl welcome :loop? 1 :rate 0.5 :start-pos 0)
 (ctl welcome :loop? 0 :rate 2 :start-pos 0)
 
-(stop) ;; OH my make the sound stop. Please.
+(stop) ;; MAKE the sound stop. Please.

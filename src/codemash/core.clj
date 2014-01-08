@@ -11,9 +11,17 @@
     * Use instruments for greater good.
     * Bend/Manupliate instruments live.
     * Maybe Music...
+
+  Tools:
+    * Emacs 24.3
+    * Emacs live
+      - bash <(curl -fksSL https://raw.github.com/overtone/emacs-live/master/installer/install-emacs-live.sh)
+    * Overtone
 "
   (:use overtone.live)
-  (:require [codemash.graphs :as graph]))
+  (:require [codemash.graphs :as graph]
+            [codemash.art :as art]
+            [codemash.voice :as voice]))
 
 (use 'overtone.live)
 (odoc demo)
@@ -21,6 +29,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;     Waves           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
+(do
+  (voice/waves)
+  (println art/waves))
 
 (demo (sin-osc))
 (demo (lf-saw))
@@ -30,26 +41,49 @@
 (demo (square))
 (demo (lf-tri))
 
-;;Synthesis
-;; Turning waves into complex sounds.
-;; * Additive
-;; * Subtractive
+(stop)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Synthesis                         ;;
+;;                                  ;;
+;;Turning waves into complex sounds.;;
+;; * Additive                       ;;
+;; * Subtractive                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(voice/synthesis)
 
 ;; play{d=Duty;f=d.kr(1/[1,2,4],0,Dseq([0,3,7,12,17]+24,inf));GVerb.ar(Blip.ar(f.midicps*[1,4,8],LFNoise1.kr(1/4,3,4)).sum,200,8)}
 
-(defsynth pop [freq 300]
-  (let [src (sin-osc freq)]
-    (out 0 src)))
+(defsynth pop [freq 300  amp 1]
+  (let [sin1 (sin-osc freq)
+        sin2 (sin-osc (* 1.1 freq))
+        sin3 (sin-osc (* 0.9 freq))
+        wood (bpf:ar (* (white-noise:ar) (line:kr 5 0 0.02)) freq 0.02)
+        src (mix [sin1 sin2 sin3 wood])
+
+;;        env (env-gen (perc :release 0.8 ))
+
+
+        ]
+    (out 0 (* src))))
 
 (show-graphviz-synth pop)
 
 (def p (pop))
 
-(ctl p :freq 200)
+(ctl p :freq 200 :amp 0.1)
 (ctl p :freq 250)
 (kill p)
 
-;;UGENS - Unit generators (Sweet shop)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;UGENS - Unit generators (Sweet shop);;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; * Cheat sheet:
+;;     - https://github.com/overtone/overtone/raw/master/docs/cheatsheet/overtone-cheat-sheet.pdf
+
+(do
+  (voice/ugens)
+  (println art/sweet-shop))
 
 (defsynth ding [freq 880 dur 0.2 level 0.25 pan 0.0 out-bus 0]
   (let [amp  (env-gen:ar (env-perc) :action FREE :time-scale dur)
@@ -81,15 +115,19 @@
 
 ;;Samples
 
-(def subby-s (freesound-sample))
+;;(def subby-s (freesound-sample))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Busses - Wiring synths ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(do
+  (println art/busses)
+  (voice/busses))
+
 ;;Audio busses are just ids preallocated at boot.
-(defonce tri-bus (audio-bus))
-(defonce sin-bus (audio-bus))
+(defonce tri-bus (audio-bus "triangle bus"))
+(defonce sin-bus (audio-bus "sin bus"))
 
 (println sin-bus)
 
@@ -113,7 +151,7 @@
   (def mft (modulated-freq-tri [:tail late-g] sin-bus)))
 
 (comment
-  (ctl mft :freq-bus sin-bus))
+  (ctl mft :freq-bus tri-bus))
 
 (comment
   (ctl tri-synth-inst :freq 0.5))
@@ -127,6 +165,9 @@
 ;;Instruments;;
 ;;;;;;;;;;;;;;;
 
+(do
+  (voice/instruments))
+
 ;;Sampled
 (comment (require 'overtone.inst.sampled-piano))
 (require '[overtone.inst.piano :as piano])
@@ -137,21 +178,25 @@
 (s-piano/sampled-piano :note 50)
 
 ;;Processing GUI
-(require '[quil.core :as q :refer [defsketch]])
+;;(require '[quil.core :as q :refer [defsketch]])
 
 ;;;;;;;;;;
 ;;Timing;;
 ;;;;;;;;;;
 
+(do
+  (voice/timing)
+  (println art/time))
+
 (defonce timing-g (group "codemash timing" :tgt (foundation-safe-pre-default-group)))
 
+;;The wires
 (defonce root-trigger-bus (control-bus))
 (defonce root-count-bus   (control-bus))
 (defonce beat-trigger-bus (control-bus))
 (defonce beat-count-bus   (control-bus))
 
 (defonce count-trigger-id (trig-id))
-
 (def current-beat 30)
 
 (defsynth trigger [rate 100 out-bus 0]
@@ -164,17 +209,22 @@
   (out:kr out-bus (pulse-divider (in:kr in-bus) div)))
 
 (defonce root-trigger (trigger [:head timing-g] :rate 100 :in-bus root-trigger-bus))
+
 (defonce root-count   (counter [:after root-trigger] :in-bus root-trigger-bus :out-bus root-count-bus))
+
 (defonce beat-trigger (divider [:after root-trigger] :div current-beat :in-bus root-trigger-bus :out-bus beat-trigger-bus))
+
 (defonce beat-count   (counter [:after beat-trigger] :in-bus beat-trigger-bus :out-bus beat-count-bus))
+
 (defsynth get-beat [] (send-trig (in:kr beat-trigger-bus) count-trigger-id (+ (in:kr beat-count-bus) 1)))
+
 
 (defonce beat (get-beat [:after beat-count]))
 
 (require '[overtone.inst.drum :as drum])
 (on-trigger count-trigger-id (fn [x] (drum/kick)) ::beat-watch)
 
-(ctl beat-trigger :div 10)
+(ctl beat-trigger :div 30)
 (ctl root-trigger :rate 100)
 
 (comment (remove-event-handler ::beat-watch))
@@ -182,12 +232,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Building Sequencer with buffers;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(do
+  (voice/buffers)
+  (println art/buffers))
 
 (def beats-g (group "beats"))
 
 (def kick-s (load-sample "~/Workspace/music/samples/sliced-p5/kick.aif"))
 
 (defonce kick-sequencer-buffer (buffer 8))
+(buffer-get kick-sequencer-buffer 7)
 
 (sample-player kick-s)
 
@@ -203,10 +257,7 @@
      out-bus (* vol
                 amp
                 (pan2
-                 (rlpf
-                  (scaled-play-buf 1 buf rate bar-trg)
-                  (demand bar-trg 0 (dbrown 200 20000 50 INF))
-                  (lin-lin:kr (lf-tri:kr 0.01) -1 1 0.1 0.9)))))))
+                 (scaled-play-buf 1 buf rate bar-trg))))))
 
 
 (def kicks
@@ -270,69 +321,16 @@
 
 (buffer-write! shake1-sequencer-buffer [0 0 0 0 1 0 0 0])
 
-
-(stop)
-
-;;;;;;;;;;;;;;;;;;;;;;;
-;; Timing and Buffers;;
-;;;;;;;;;;;;;;;;;;;;;;;
-
-(require '[codemash.timing :as time])
-
-(defonce rhythm-g (group "Rhythm" :after time/timing-g))
-(defonce music-buffer (buffer 256))
-
-(def phasor-b (control-bus))
-(def saw-x-b1 (control-bus))
-(def saw-x-b2 (control-bus))
-
-(defonce saw-s1 (time/saw-x [:head rhythm-g] :out-bus saw-x-b1))
-(defonce saw-s2 (time/saw-x [:head rhythm-g] :out-bus saw-x-b2))
-
-(def phasor-s (time/buf-phasor [:after saw-s1] saw-x-b1 :out-bus phasor-b :buf music-buffer))
-
-(defsynth fuzzy-beep [attack 0.01 sustain 0.03 release 0.1 amp 0.8 out-bus 0]
-  (let [freq (/ (in:kr phasor-b) 2)
-        env  (env-gen (env-lin attack sustain release) 1 1 0 1)
-        src  (mix (saw [freq (* 1.01 freq)]))
-        src  (lpf src (mouse-y 100 20000))
-        sin  (sin-osc (* 1 freq))
-        sin2 (sin-osc freq)
-        src  (mix [src sin sin2])]
-    (out out-bus (pan2 (* src amp)))))
-
-(defsynth beepy [amp 1 out-bus 0]
-  (let [freq   (* (in:kr phasor-b) 1)
-        ct-saw (+ (lin-lin (in:kr saw-x-b2) 0 1 0.5 1))]
-    (out out-bus (* 0.5  ct-saw amp 1.25 (mix (+ (lf-tri [(* 0.5 freq)
-                                                          (* 0.25 freq)
-                                                          (* 0.5 freq)
-                                                          (* 2.01 freq)])))))))
-
-(def hi   (beepy      [:head rhythm-g] :amp 0 :out-bus 0))
-(def mid  (fuzzy-beep [:head rhythm-g] :amp 0 :out-bus 0))
-
-(def score (map note [:C5 :A3 :B4 :A3 :C5 :E5 :A3 :A4 :C5 :A3 :B4 :A3 :C5 :A4]))
-
-(buffer-write! music-buffer (take 256 (cycle (map midi->hz codemash.score/score))))
-
-(ctl time/root-s :rate 1/32)
-
-(ctl hi :amp 1)
-(ctl mid :amp 1)
-
-(kill hi)
-(kill mid)
 (stop)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Timing AND Buffers;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 
-(def score-b         (buffer 128))
-(def duration-b      (buffer 128))
-(def bass-duration-b (buffer 128))
-(def bass-notes-b    (buffer 128))
+(defonce score-b         (buffer 128))
+(defonce duration-b      (buffer 128))
+(defonce bass-duration-b (buffer 128))
+(defonce bass-notes-b    (buffer 128))
 
 (def score [:F4 :F4 :F4 :F4 :F4 :F4 :F4
             :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4
@@ -387,15 +385,8 @@
 
 (def ps (deep-saw 100 :duration-bus bass-duration-b :beat-count-bus beat-count-bus :offset-bus bass-notes-b :amp 0.9))
 
-(ctl ps :damp 1)
-(ctl ps :room 1)
-
-(kill ps)
-
-(buffer-write! bass-duration-b (take 32 (cycle [(/ 1 3.5)])))
-(buffer-write! bass-notes-b (take 32 (cycle (map note [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2]))))
-
-(buffer-write! bass-notes-b (take 32 (cycle (map #(+ 0 (note %)) [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2]))))
+(buffer-write! bass-duration-b (take 128 (cycle [(/ 1 3.5)])))
+(buffer-write! bass-notes-b (take 128 (cycle (map note [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2]))))
 
 (buffer-write! score-b (take 128 (cycle (map note score))))
 (buffer-write! duration-b (take 128 (cycle duration)))
@@ -409,13 +400,21 @@
 
 (on-event [:midi :note-on]
           (fn [m]
-            (buffer-write! music-buffer (map midi->hz
-                                             (map (fn [midi-note] (+ -12 midi-note))
-                                                  (repeat 256 (:note m))))))
+            (println m)
+            (buffer-write! bass-notes-b
+              (map (fn [midi-note]
+                     (+ (:note m) (note midi-note)))
+                   (take 128 (cycle [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2])))))
           ::phat-bass-keyboard)
 
 (comment
-  (remove-event-handler ::drumkit))
+  (remove-event-handler ::phat-bass-keyboard))
+
+;;Launchpad
+
+(use '[launchpad.core] :reload)
+(boot!)
+
 
 ;;Mouse
 
