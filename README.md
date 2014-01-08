@@ -21,6 +21,9 @@ Tools:
  * Emacs live
 bash <(curl -fksSL https://raw.github.com/overtone/emacs-live/master/installer/install-emacs-live.sh)
  * Overtone
+ 
+### The journey starts here: 
+https://github.com/josephwilk/welcome-to-the-world-of-sound/blob/master/src/codemash/core.clj
 
 ## License
 
