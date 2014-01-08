@@ -1,4 +1,6 @@
 (ns codemash.samples
+  "Samples lurk here:
+   https://github.com/stars-my-destination/samples"
   (:use overtone.live))
 
 ;;Samples by devism http://monome.org/community/discussion/736/x&page=1#Item_22
