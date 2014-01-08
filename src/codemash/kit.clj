@@ -65,8 +65,6 @@ https://github.com/stars-my-destination/cassiopeia
 (lp-core/boot!)
 (nk2/start! banks cfg)
 
-
-
 (defsynth basic-mixer [boost 0 amp 1 mute 1 in-bus 0 out-bus 0 clamp-down-t 0.05]
   (out out-bus (* (+ boost 1) amp (lag mute clamp-down-t) (in:ar in-bus 2))))
 
@@ -472,7 +470,6 @@ https://github.com/stars-my-destination/cassiopeia
                 :mixers mixers}
       {:type ::sequencer})))
 
-
 (defonce sequencer-64
   (mk-sequencer
    (nk-bank :lp64)
@@ -507,6 +504,8 @@ https://github.com/stars-my-destination/cassiopeia
 (defonce seq-basic-mixer-g (group :after default-mixer-g))
 (defonce seq-mix-s64  (basic-mixer [:head seq-basic-mixer-g] :in-bus lp64-b :mute 0))
 
+(ctl seq-mix-s64 :mute 1)
+
 (def sample-selection [;;arp-s
                        ;;arp-chord-s
                        voice-1-s
@@ -529,8 +528,7 @@ https://github.com/stars-my-destination/cassiopeia
                        ;;  gtr-str-s
                        ])
 
-;;(def seq-mixers  (doall (map-indexed (fn [idx _] (mixers/add-nk-mixer (nk-bank :lp64) (str "lp64-seq-" idx) seq-mixer-group lp64-b)) sample-selection)))
-(def seq-mixers [])
+(def seq-mixers (vec (doall (map-indexed (fn [idx _] (add-nk-mixer (nk-bank :lp64) (str "lp64-seq-" idx) seq-mixer-group lp64-b)) sample-selection))))
 
 (defonce rate-b  (control-bus 1 "Rate"))
 (defonce rater-s (rater :out-bus rate-b))
