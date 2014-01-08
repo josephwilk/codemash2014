@@ -177,9 +177,6 @@
 (piano/piano :note 50)
 (s-piano/sampled-piano :note 50)
 
-;;Processing GUI
-;;(require '[quil.core :as q :refer [defsketch]])
-
 ;;;;;;;;;;
 ;;Timing;;
 ;;;;;;;;;;
@@ -217,7 +214,6 @@
 (defonce beat-count   (counter [:after beat-trigger] :in-bus beat-trigger-bus :out-bus beat-count-bus))
 
 (defsynth get-beat [] (send-trig (in:kr beat-trigger-bus) count-trigger-id (+ (in:kr beat-count-bus) 1)))
-
 
 (defonce beat (get-beat [:after beat-count]))
 
