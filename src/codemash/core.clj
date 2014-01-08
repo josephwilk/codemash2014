@@ -117,7 +117,7 @@
 ;;;;;;;;;;;
 
 (do
-  (art/samples)
+  (println art/samples)
   (voice/samples))
 
 (def clap (freesound 48310))
@@ -230,7 +230,7 @@
 (ctl beat-trigger :div 30)
 (ctl root-trigger :rate 100)
 
-(comment (remove-event-handler ::beat-watch))
+(remove-event-handler ::beat-watch)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Building Sequencer with buffers;;
