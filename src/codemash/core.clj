@@ -116,6 +116,10 @@
 ;;Samples;;
 ;;;;;;;;;;;
 
+(do
+  (art/samples)
+  (voice/samples))
+
 (def clap (freesound 48310))
 (def clap2 (freesound 132676))
 
@@ -177,7 +181,8 @@
 (piano/piano :note 50)
 (s-piano/sampled-piano :note 50)
 
-(doseq [n [50 60 50 60]] (s-piano/sampled-piano :note n) (Thread/sleep 200))
+(def piece [:E4 :F#4 :B4 :C#5 :D5 :F#4 :E4 :C#5 :B4 :F#4 :D5 :C#5])
+(doseq [n piece] (s-piano/sampled-piano :note (note n)) (Thread/sleep 200))
 
 ;;;;;;;;;;
 ;;Timing;;
@@ -332,6 +337,8 @@
             :BB4 :BB4 :BB4 :BB4 :BB4 :BB4
             :D#4 :D#4 :D#4])
 
+(def bass-score [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2])
+
 (def duration     [1/7])
 
 (def score (concat
@@ -402,6 +409,10 @@
 ;;Hardware (External devices);;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(do
+  (println art/hardware)
+  (voice/hardware))
+
 (midi-connected-devices)
 
 (on-event [:midi :note-on]
@@ -409,8 +420,8 @@
             (println m)
             (buffer-write! bass-notes-b
               (map (fn [midi-note]
-                     (+ (:note m) (note midi-note)))
-                   (take 128 (cycle [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2])))))
+                     (+ -24 (:note m) (note midi-note)))
+                   (take 128 (cycle score)))))
           ::phat-bass-keyboard)
 
 (comment
@@ -429,7 +440,6 @@
 (spacey)
 (kill spacey)
 
-
 ;; Extra Tweaks
 
 (defonce clap-sequencer-buffer (buffer 8))
@@ -440,3 +450,12 @@
                                       :sequencer clap-sequencer-buffer))))
 
 (buffer-write! clap-sequencer-buffer [1 0 0 0 0 0 0 1])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Go forth and make sounds ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(do
+  (voice/the-end)
+  (println art/end)
+)
