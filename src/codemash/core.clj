@@ -36,8 +36,6 @@
 (demo (sin-osc))
 (demo (lf-saw))
 (demo (pulse))
-(demo (lf-pulse:ar))
-
 (demo (square))
 (demo (lf-tri))
 
@@ -50,11 +48,12 @@
 ;; * Additive                       ;;
 ;; * Subtractive                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(voice/synthesis)
+
+(do (voice/synthesis))
 
 ;; play{d=Duty;f=d.kr(1/[1,2,4],0,Dseq([0,3,7,12,17]+24,inf));GVerb.ar(Blip.ar(f.midicps*[1,4,8],LFNoise1.kr(1/4,3,4)).sum,200,8)}
 
-(defsynth pop [freq 300  amp 1]
+(defsynth wallop [freq 300  amp 1]
   (let [sin1 (sin-osc freq)
         sin2 (sin-osc (* 1.1 freq))
         sin3 (sin-osc (* 0.9 freq))
@@ -67,9 +66,9 @@
         ]
     (out 0 (* src))))
 
-(show-graphviz-synth pop)
+(show-graphviz-synth wallop)
 
-(def p (pop))
+(def p (wallop))
 
 (ctl p :freq 200 :amp 0.1)
 (ctl p :freq 250)
@@ -113,9 +112,16 @@
 (ding)
 (tick)
 
-;;Samples
+;;;;;;;;;;;
+;;Samples;;
+;;;;;;;;;;;
 
-;;(def subby-s (freesound-sample))
+(def clap (freesound 48310))
+(def clap2 (freesound 132676))
+
+(def waves-s (sample (freesound-path 48412)))
+(def waves (waves-s :rate 0.3 :vol 0.5))
+(kill waves)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Busses - Wiring synths ;;
@@ -147,25 +153,19 @@
   (let [freq (+ mid-freq (* (in:kr freq-bus) freq-amp))]
     (out 0 (pan2 (lf-tri freq)))))
 
-(comment
-  (def mft (modulated-freq-tri [:tail late-g] sin-bus)))
+(def mft (modulated-freq-tri [:tail late-g] sin-bus))
 
-(comment
-  (ctl mft :freq-bus tri-bus))
+(ctl mft :freq-bus tri-bus)
+(ctl tri-synth-inst :freq 1)
 
-(comment
-  (ctl tri-synth-inst :freq 0.5))
-
-(comment
-  (do
-    (kill mft))
-  )
+(kill mft)
 
 ;;;;;;;;;;;;;;;
 ;;Instruments;;
 ;;;;;;;;;;;;;;;
 
 (do
+  (println art/instrument)
   (voice/instruments))
 
 ;;Sampled
@@ -176,6 +176,8 @@
 
 (piano/piano :note 50)
 (s-piano/sampled-piano :note 50)
+
+(doseq [n [50 60 50 60]] (s-piano/sampled-piano :note n) (Thread/sleep 200))
 
 ;;;;;;;;;;
 ;;Timing;;
@@ -255,7 +257,6 @@
                 (pan2
                  (scaled-play-buf 1 buf rate bar-trg))))))
 
-
 (def kicks
   (doall
    (for [x (range 8)]
@@ -304,9 +305,9 @@
                      :sequencer shake2d-sequencer-buffer))))
 
 (buffer-write! shake2d-sequencer-buffer [0 0 0 0 0 0 0 1])
+(buffer-write! shake2d-sequencer-buffer [1 1 1 1 1 1 1 1])
 
-
-(defonce shake1-s      (load-sample "~/Workspace/music/samples/sliced-p5/single-shake.aif"))
+(defonce shake1-s (load-sample "~/Workspace/music/samples/sliced-p5/single-shake.aif"))
 
 (defonce shake1-sequencer-buffer (buffer 8))
 
@@ -316,7 +317,6 @@
                      :sequencer shake1-sequencer-buffer))))
 
 (buffer-write! shake1-sequencer-buffer [0 0 0 0 1 0 0 0])
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Timing AND Buffers;;
@@ -341,7 +341,7 @@
             (map #(+ -5  (note %)) score)
             (map #(+ -1  (note %)) score)))
 
-(defsynth woody-beep [duration-bus 0 beat-count-bus 0 offset-bus 0 amp 1 out-bus 0]
+(defsynth woody-beep [duration-bus 0 room 1 damp 1 beat-count-bus 0 offset-bus 0 amp 1 out-bus 0]
   (let [cnt    (in:kr beat-count-bus)
         offset (buf-rd:kr 1 offset-bus cnt)
         durs   (buf-rd:kr 1 duration-bus cnt)
@@ -355,10 +355,8 @@
         sin2 (sin-osc:ar (* 1.01 freq))
         wood (bpf:ar (* (white-noise:ar) (line:kr 5 0 0.02)) freq 0.02)
         src (mix [sin sin2 tri wood])
-        src (free-verb src)]
+        src (free-verb src 1 room damp)]
     (out:ar out-bus (* amp env (pan2 src)))))
-
-    (def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 4))
 
 (defsynth deep-saw [freq 100 beat-count-bus 0 offset-bus 0 duration-bus 0 out-bus 0 amp 1 pan 0]
   (let [cnt    (in:kr beat-count-bus)
@@ -378,10 +376,21 @@
         src (free-verb src 0.33 1 1)]
     (out out-bus (* amp [src src]))))
 
-(def ps (deep-saw 100 :duration-bus bass-duration-b :beat-count-bus beat-count-bus :offset-bus bass-notes-b :amp 0.9))
+(def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 4))
 
-(buffer-write! bass-duration-b (take 128 (cycle [(/ 1 3.5)])))
-(buffer-write! bass-notes-b (take 128 (cycle (map note [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2]))))
+(kill w)
+(ctl w :damp 1)
+(ctl w :room 1)
+
+(def ps (deep-saw 100 :duration-bus bass-duration-b :beat-count-bus beat-count-bus :offset-bus bass-notes-b :amp 0.8))
+
+(ctl ps :amp 0.6)
+(kill ps)
+
+(buffer-write! bass-duration-b (take 128 (cycle [(/ 1 0.87)])))
+(buffer-write! bass-notes-b (take 128 (cycle (map note [:F2 :F2 :G2 :G2 :F2 :F2]))))
+
+(buffer-write! bass-notes-b (take 128 (cycle (map #(+ -5 (note %)) score))))
 
 (buffer-write! score-b (take 128 (cycle (map note score))))
 (buffer-write! duration-b (take 128 (cycle duration)))
@@ -412,7 +421,6 @@
 (use '[launchpad.core] :reload)
 (boot!)
 
-
 ;;Mouse
 
 (defsynth spacey [out-bus 0 amp 1]
@@ -420,3 +428,15 @@
 
 (spacey)
 (kill spacey)
+
+
+;; Extra Tweaks
+
+(defonce clap-sequencer-buffer (buffer 8))
+
+(def claps
+  (doall
+   (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf clap2 :beat-num x
+                                      :sequencer clap-sequencer-buffer))))
+
+(buffer-write! clap-sequencer-buffer [1 0 0 0 0 0 0 1])
