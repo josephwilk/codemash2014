@@ -1,7 +1,7 @@
 (ns codemash.voice
   (:use [overtone.live]))
 
-(def voices [:agnes :albert :alex "bad news" :bahh  :bells :boing :bruce :bubbles :cellos :deranged :fred "good news" :hysterical :junior :kathy "pipe organ"
+(def voices [:agnes :albert :alex :bad-news :bahh  :bells :boing :bruce :bubbles :cellos :deranged :fred :good-news :hysterical :junior :kathy :pipe-organ
              :princess :ralph :trinoids :vicki :victoria :whisper :zarvox])
 
 (def waves-b (speech-buffer "waves" :voice (rand-nth voices)))
