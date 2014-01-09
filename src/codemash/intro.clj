@@ -1,7 +1,4 @@
-(ns codemash.intro
-  ;;http://bit.ly/K838FR
-  ;;git clone https://github.com/josephwilk/welcome-to-the-world-of-sound.git
-
+(ns codemash.intro ;;http://bit.ly/K838FR git clone https://github.com/josephwilk/welcome-to-the-world-of-sound.git
   "88        88              88  88                                                    88
    88        88              88  88                                                    88
    88        88              88  88                                                    88
@@ -20,14 +17,23 @@
   `8bd8'  `8bd8'    '8b,   ,aa  88  '8a,   ,aa  '8a,   ,a8'  88      88      88  '8b,   ,aa
     YP      YP       `'Ybbd8''  88   `'Ybbd8''   `'YbbdP''   88      88      88   `'Ybbd8''
 
-                                 88                                                                       88           88                    ad88
-  ,d                      ,d     88                                                                       88           88                   d8'
-  88                      88     88                                                                       88           88                   88
-MM88MMM  ,adPPYba,      MM88MMM  88,dPPYba,    ,adPPYba,     8b      db      d8   ,adPPYba,   8b,dPPYba,  88   ,adPPYb,88      ,adPPYba,  MM88MMM
-  88    a8'     '8a       88     88P'    '8a  a8P_____88     `8b    d88b    d8'  a8'     '8a  88P'   'Y8  88  a8'    `Y88     a8'     '8a   88
-  88    8b       d8       88     88       88  8PP'''''''      `8b  d8'`8b  d8'   8b       d8  88          88  8b       88     8b       d8   88
-  88,   '8a,   ,a8'       88,    88       88  '8b,   ,aa       `8bd8'  `8bd8'    '8a,   ,a8'  88          88  '8a,   ,d88     '8a,   ,a8'   88
-  'Y888  `'YbbdP''        'Y888  88       88   `'Ybbd8''         YP      YP       `'YbbdP''   88          88   `'8bbdP'Y8      `'YbbdP''    88
+                                 88                       
+  ,d                      ,d     88                       
+  88                      88     88                       
+MM88MMM  ,adPPYba,      MM88MMM  88,dPPYba,    ,adPPYba,  
+  88    a8'     '8a       88     88P'    '8a  a8P_____88  
+  88    8b       d8       88     88       88  8PP'''''''  
+  88,   '8a,   ,a8'       88,    88       88  '8b,   ,aa  
+  'Y888  `'YbbdP''        'Y888  88       88   `'Ybbd8''  
+
+                                                88           88                    ad88
+                                             88           88                   d8'
+                                             88           88                   88
+8b      db      d8   ,adPPYba,   8b,dPPYba,  88   ,adPPYb,88      ,adPPYba,  MM88MMM
+`8b    d88b    d8'  a8'     '8a  88P'   'Y8  88  a8'    `Y88     a8'     '8a   88
+ `8b  d8'`8b  d8'   8b       d8  88          88  8b       88     8b       d8   88
+  `8bd8'  `8bd8'    '8a,   ,a8'  88          88  '8a,   ,d88     '8a,   ,a8'   88
+    YP      YP       `'YbbdP''   88          88   `'8bbdP'Y8      `'YbbdP''    88
 
  ad88888ba                                                   88
 d8'     '8b                                                  88
