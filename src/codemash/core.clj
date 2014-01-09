@@ -51,19 +51,13 @@
 
 (do (voice/synthesis))
 
-
-(defsynth wallop [freq 300  amp 1]
-  (let [sin1 (sin-osc freq)
-        sin2 (sin-osc (* 1.1 freq))
-        sin3 (sin-osc (* 0.9 freq))
-        wood (bpf:ar (* (white-noise:ar) (line:kr 5 0 0.02)) freq 0.02)
-        src (mix [sin1 sin2 sin3 wood])
-
-;;        env (env-gen (perc :release 0.8 ))
-
-
-        ]
-    (out 0 (* src))))
+(defsynth wallop [freq 300]
+  (let [tri (lf-tri freq)
+        sin1 (* 1 (sin-osc freq))
+        sin2 (* 1.1 (sin-osc freq))
+        src (mix [tri sin1 sin2])
+        env (env-gen (perc :attack 0 :release 0.25))]
+    (out 0 (pan2 (* env src)))))
 
 (show-graphviz-synth wallop)
 
@@ -121,6 +115,7 @@
 (ding)
 (tick)
 
+(kill fallout-wind)
 ;;;;;;;;;;;
 ;;Samples;;
 ;;;;;;;;;;;
@@ -187,9 +182,14 @@
 ;;Sampled
 (comment (require '[overtone.inst.sampled-piano :as s-piano]))
 (require '[overtone.inst.piano :as piano])
+(require '[overtone.inst.synth :as o-synth])
 
 (piano/piano :note 50)
 (s-piano/sampled-piano :note 50)
+(o-synth/cs80lead)
+(o-synth/supersaw)
+
+(stop)
 
 (def piece [:E4 :F#4 :B4 :C#5 :D5 :F#4 :E4 :C#5 :B4 :F#4 :D5 :C#5])
 (doseq [n piece] (s-piano/sampled-piano :note (note n)) (Thread/sleep 200))
@@ -211,7 +211,7 @@
 (defonce beat-count-bus   (control-bus))
 
 (defonce count-trigger-id (trig-id))
-(def current-beat 30)
+(def current-beat 29)
 
 (defsynth trigger [rate 100 out-bus 0]
   (out:kr out-bus (impulse:kr rate)))
@@ -237,7 +237,7 @@
 (require '[overtone.inst.drum :as drum])
 (on-trigger count-trigger-id (fn [x] (drum/kick)) ::beat-watch)
 
-(ctl beat-trigger :div 30)
+(ctl beat-trigger :div 29)
 (ctl root-trigger :rate 100)
 
 (remove-event-handler ::beat-watch)
@@ -252,6 +252,7 @@
 (def beats-g (group "beats"))
 
 (def kick-s (load-sample "~/Workspace/music/samples/sliced-p5/kick.aif"))
+(def beatbox-kick-s (freesound-sample 70631))
 
 (defonce kick-sequencer-buffer (buffer 8))
 
@@ -270,16 +271,16 @@
     (out
      out-bus (* vol
                 amp
-                (pan2
-                 (scaled-play-buf 1 buf rate bar-trg))))))
+                (scaled-play-buf 1 buf rate bar-trg)))))
 
 (def kicks
   (doall
    (for [x (range 8)]
-     (mono-sequencer [:tail beats-g] :buf kick-s :beat-num x
+     (mono-sequencer [:tail beats-g] :buf beatbox-kick-s :beat-num x
                      :sequencer kick-sequencer-buffer))))
 
 (buffer-write! kick-sequencer-buffer [1 0 0 0 0 1 0 0])
+(buffer-write! kick-sequencer-buffer [1 0 0 0 0 1 1 0])
 
 (defonce tom-sequencer-buffer (buffer 8))
 (defonce tom-s (load-sample "~/Workspace/music/samples/sliced-p5/tom.aif"))
@@ -397,12 +398,12 @@
 (def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 4))
 
 (kill w)
-(ctl w :damp 1)
-(ctl w :room 1)
+(ctl w :damp 5)
+(ctl w :room 10)
 
 (def ps (deep-saw 100 :duration-bus bass-duration-b :beat-count-bus beat-count-bus :offset-bus bass-notes-b :amp 0.8))
 
-(ctl ps :amp 0.6)
+(ctl ps :amp 1)
 (kill ps)
 
 (buffer-write! bass-duration-b (take 128 (cycle [(/ 1 0.87)])))
@@ -414,7 +415,7 @@
 (buffer-write! duration-b (take 128 (cycle duration)))
 
 (ctl root-trigger :rate 100)
-(ctl beat-trigger :div 30)
+(ctl beat-trigger :div 29)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Hardware (External devices);;
@@ -454,13 +455,23 @@
 ;; Improv
 
 (defonce clap-sequencer-buffer (buffer 8))
-
 (def claps
   (doall
    (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf clap2 :beat-num x
                                       :sequencer clap-sequencer-buffer))))
 
-(buffer-write! clap-sequencer-buffer [1 0 0 0 0 0 0 1])
+(buffer-write! clap-sequencer-buffer [1 0 0 0 0 0 0 0])
+
+(defonce clap1-sequencer-buffer (buffer 8))
+(def claps
+  (doall
+   (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf clap :beat-num x
+                                      :sequencer clap1-sequencer-buffer))))
+
+(buffer-write! clap1-sequencer-buffer [0 0 0 0 0 0 0 1])
+
+
+;(stop)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Go forth and make sounds ;;
