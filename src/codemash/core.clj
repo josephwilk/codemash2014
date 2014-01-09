@@ -19,8 +19,7 @@
     * Overtone
 "
   (:use overtone.live)
-  (:require [codemash.graphs :as graph]
-            [codemash.art :as art]
+  (:require [codemash.art :as art]
             [codemash.voice :as voice]))
 
 (use 'overtone.live)
@@ -100,8 +99,8 @@
 ;;;;;;;;;;;
 (do (println art/samples) (voice/samples))
 
-(def clap (freesound-sample 48310))
-(def clap2 (freesound-sample 132676))
+(def clap-s (freesound-sample 48310))
+(def clap2-s (freesound-sample 132676))
 
 (def waves-s (freesound-sample 163120))
 (def waves (waves-s :rate 0.8 :vol 0.5))
@@ -334,14 +333,14 @@
         src (mix [saw1 saw2 sin1 sin2])
         env (env-gen:ar (env-asr) trig)
         src (lpf:ar src)
-        src (free-verb src 0.33 1 1)]
+        src (free-verb :in src :mix 0.33 :room 0.5 :damp 0.5)]
     (out out-bus (* amp [src src]))))
 
 (def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 5))
 
-(kill w)
+;;(kill woody-beep)
 (ctl w :damp 1)
-(ctl w :room 1)
+(ctl w :room 0.5)
 
 (def ps (deep-saw 100 :duration-bus bass-duration-b :beat-count-bus beat-count-bus :offset-bus bass-notes-b :amp 0.8))
 
@@ -361,7 +360,7 @@
 (buffer-write! bass-notes-b    (take 128 (cycle (map note bass-score))))
 (buffer-write! bass-notes-b    (take 128 (cycle (map #(+ -12 (note %)) score))))
 
-(buffer-write! score-b    (take 128 (cycle (map #(+ 0 ( note %)) score))))
+(buffer-write! score-b    (take 128 (cycle (map #(+ 0 ( note %)) n-score))))
 (buffer-write! duration-b (take 128 (cycle duration)))
 
 (ctl root-trigger :rate 100)
@@ -404,8 +403,4 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Go forth and make sounds ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(do
-  (voice/the-end)
-  (println art/end)
-)
+(do (voice/the-end) (println art/end))
