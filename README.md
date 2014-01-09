@@ -1,4 +1,7 @@
-# Welcome to the world of SOUND 
+# Welcome to the world of SOUND
+
+HELLO!
+
 ###codemash
 
 HELLO and welcome to the wonderful world of SOUND.
@@ -32,9 +35,12 @@ bash <(curl -fksSL https://raw.github.com/overtone/emacs-live/master/installer/i
 ```
 clone https://github.com/josephwilk/welcome-to-the-world-of-sound.git
 cd welcome-to-the-world-of-sound
-emacs src/codemash/core.clj
-```
+emacs
 
+META-X nrepl-jack-in
+
+;;Open src/codemash/core.clj
+```
 ## License
 
 Copyright © 2014 Joseph Wilk
