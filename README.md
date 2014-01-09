@@ -30,8 +30,8 @@ bash <(curl -fksSL https://raw.github.com/overtone/emacs-live/master/installer/i
  
 ### Starting the journey: 
 
-```
-clone https://github.com/josephwilk/welcome-to-the-world-of-sound.git
+```shell
+git clone https://github.com/josephwilk/welcome-to-the-world-of-sound.git
 cd welcome-to-the-world-of-sound
 emacs
 
