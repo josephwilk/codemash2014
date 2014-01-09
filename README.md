@@ -1,7 +1,7 @@
 # Welcome to the world of SOUND 
 ###codemash
 
-HELLO and welcome to the woderful world of SOUND.
+HELLO and welcome to the wonderful world of SOUND.
 
 WARNING/DANGER:
     Its possible to generate sounds that may cause harm or damage to
@@ -18,12 +18,22 @@ Musical Mission:
 Tools:
 
  * Emacs 24.3
+```
+brew install emacs
+```
  * Emacs live
+```
 bash <(curl -fksSL https://raw.github.com/overtone/emacs-live/master/installer/install-emacs-live.sh)
+```
  * Overtone
  
-### The journey starts here: 
-https://github.com/josephwilk/welcome-to-the-world-of-sound/blob/master/src/codemash/core.clj
+### Starting the journey: 
+
+```
+clone https://github.com/josephwilk/welcome-to-the-world-of-sound.git
+cd welcome-to-the-world-of-sound
+emacs src/codemash/core.clj
+```
 
 ## License
 
