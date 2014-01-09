@@ -11,6 +11,7 @@
 (def timing-b (speech-buffer "Timing" :voice (rand-nth voices)))
 (def buffers-b (speech-buffer "Building Sequencer with buffers" :voice (rand-nth voices)))
 (def instruments-b (speech-buffer "Musical Instruments" :voice (rand-nth voices)))
+(def notes-buffers-b (speech-buffer "Playing notes with buffers" :voice (rand-nth voices)))
 (def samples-b (speech-buffer "Samples" :voice (rand-nth voices)))
 (def hardware-b (speech-buffer "Hardware External devices" :voice (rand-nth voices)))
 (def end-b (speech-buffer "Go forth and make noise.
@@ -26,6 +27,7 @@
 (defn instruments [] (instruments-b))
 (defn hardware [] (hardware-b))
 (defn samples [] (samples-b))
+(defn notes-buffers [] (notes-buffers-b))
 
 (defn the-end [] (end-b :rate 0.6 :amp 1.5))
 

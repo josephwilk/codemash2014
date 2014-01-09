@@ -109,8 +109,8 @@
   (println art/samples)
   (voice/samples))
 
-(def clap (freesound 48310))
-(def clap2 (freesound 132676))
+(def clap (freesound-sample 48310))
+(def clap2 (freesound-sample 132676))
 
 (def waves-s (freesound-sample 163120))
 (def waves (waves-s :rate 0.8 :vol 0.5))
@@ -232,9 +232,10 @@
   (voice/buffers)
   (println art/buffers))
 
+(def sample-root "~/Workspace/music/samples/sliced-p5/")
 (def beats-g (group "beats"))
 
-(def kick-s (load-sample "~/Workspace/music/samples/sliced-p5/kick.aif"))
+(def kick-s (load-sample (str sample-root "kick.aif")))
 (def beatbox-kick-s (freesound-sample 70631))
 
 (defonce kick-sequencer-buffer (buffer 8))
@@ -244,7 +245,7 @@
 (sample-player kick-s)
 
 (defsynth mono-sequencer
-  [buf 0 rate 1 out-bus 0 beat-num 0 sequencer 0 numsteps 8 amp 1]
+  [buf 0 rate 1 out-bus 0 beat-num 0 sequencer 0 numsteps 8 amp 0.7]
   (let [cnt      (in:kr beat-count-bus)
         beat-trg (in:kr beat-trigger-bus)
         bar-trg  (and (buf-rd:kr 1 sequencer cnt)
@@ -255,7 +256,6 @@
      out-bus (* vol
                 amp
                 (scaled-play-buf 1 buf rate bar-trg)))))
-
 (def kicks
   (doall
    (for [x (range 8)]
@@ -266,7 +266,7 @@
 (buffer-write! kick-sequencer-buffer [1 0 0 0 0 1 1 0])
 
 (defonce tom-sequencer-buffer (buffer 8))
-(defonce tom-s (load-sample "~/Workspace/music/samples/sliced-p5/tom.aif"))
+(defonce tom-s (load-sample (str sample-root "tom.aif")))
 
 (def toms
   (doall
@@ -274,19 +274,15 @@
      (mono-sequencer [:tail beats-g] :buf tom-s :beat-num x
                      :sequencer tom-sequencer-buffer))))
 
-(buffer-write! tom-sequencer-buffer [0 0 1 0 0 0 1 0])
-
 (defonce shake-sequencer-buffer (buffer 8))
-(defonce shake-s (load-sample "~/Workspace/music/samples/sliced-p5/shaker.aif"))
+(defonce shake-s (load-sample (str sample-root "shaker.aif")))
 
 (def shakes
   (doall (for [x (range 8)]
            (mono-sequencer [:tail beats-g] :buf shake-s :beat-num x
                            :sequencer shake-sequencer-buffer))))
 
-(buffer-write! shake-sequencer-buffer [0 1 0 0 0 0 0 0])
-
-(defonce shake2-s (load-sample "~/Workspace/music/samples/sliced-p5/double-shake.aif"))
+(defonce shake2-s (load-sample (str sample-root "double-shake.aif")))
 (defonce shake2-sequencer-buffer (buffer 8))
 
 (def shakes2
@@ -294,9 +290,7 @@
    (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf shake2-s :beat-num x
                                       :sequencer shake2-sequencer-buffer))))
 
-(buffer-write! shake2-sequencer-buffer [0 0 0 1 0 0 0 0])
-
-(defonce shake2d-s (load-sample "~/Workspace/music/samples/sliced-p5/double-shake-deep.aif"))
+(defonce shake2d-s (load-sample (str sample-root "double-shake-deep.aif")))
 (defonce shake2d-sequencer-buffer (buffer 8))
 
 (def shakes2d
@@ -304,11 +298,7 @@
    (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf shake2d-s :beat-num x
                      :sequencer shake2d-sequencer-buffer))))
 
-(buffer-write! shake2d-sequencer-buffer [0 0 0 0 0 0 0 1])
-(buffer-write! shake2d-sequencer-buffer [1 1 1 1 1 1 1 1])
-
-(defonce shake1-s (load-sample "~/Workspace/music/samples/sliced-p5/single-shake.aif"))
-
+(defonce shake1-s (load-sample (str sample-root "single-shake.aif")))
 (defonce shake1-sequencer-buffer (buffer 8))
 
 (def shakes1
@@ -316,32 +306,25 @@
    (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf shake1-s :beat-num x
                      :sequencer shake1-sequencer-buffer))))
 
-(buffer-write! shake1-sequencer-buffer [0 0 0 0 1 0 0 0])
+(buffer-write! kick-sequencer-buffer    [1 0 0 0 0 1 0 0])
+(buffer-write! tom-sequencer-buffer     [0 0 1 0 0 0 1 0])
+(buffer-write! shake-sequencer-buffer   [0 1 0 0 0 0 0 0])
+(buffer-write! shake2-sequencer-buffer  [0 0 0 0 0 0 0 0])
+(buffer-write! shake2d-sequencer-buffer [0 0 0 0 0 0 0 1])
+(buffer-write! shake1-sequencer-buffer  [0 0 0 0 1 0 0 0])
 
-;;;;;;;;;;;;;;;;;;;;;;;
-;; Timing AND Buffers;;
-;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Playing notes with buffers ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(do
+  (println art/notes)
+  (voice/notes-buffers))
 
 (defonce score-b         (buffer 128))
 (defonce duration-b      (buffer 128))
 (defonce bass-duration-b (buffer 128))
 (defonce bass-notes-b    (buffer 128))
-
-(def score [:F4 :F4 :F4 :F4 :F4 :F4 :F4
-            :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4
-            :BB4 :BB4 :BB4 :BB4 :BB4 :BB4
-            :D#4 :D#4 :D#4])
-
-(def bass-score [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2])
-
-(def duration     [1/7])
-
-(def score (concat
-            (map #(+ -5  (note %)) score)
-            (map #(+ -5  (note %)) score)
-            (map #(+ -10 (note %)) score)
-            (map #(+ -5  (note %)) score)
-            (map #(+ -1  (note %)) score)))
 
 (defsynth woody-beep [duration-bus 0 room 1 damp 1 beat-count-bus 0 offset-bus 0 amp 1 out-bus 0]
   (let [cnt    (in:kr beat-count-bus)
@@ -378,24 +361,39 @@
         src (free-verb src 0.33 1 1)]
     (out out-bus (* amp [src src]))))
 
-(def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 4))
+(def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 5))
 
 (kill w)
-(ctl w :damp 5)
-(ctl w :room 10)
+(ctl w :damp 1)
+(ctl w :room 1)
 
 (def ps (deep-saw 100 :duration-bus bass-duration-b :beat-count-bus beat-count-bus :offset-bus bass-notes-b :amp 0.8))
 
 (ctl ps :amp 1)
 (kill ps)
 
-(buffer-write! bass-duration-b (take 128 (cycle [(/ 1 7)])))
-(buffer-write! bass-notes-b (take 128 (cycle (map note bass-score))))
-(buffer-write! bass-notes-b (take 128 (cycle (map #(+ -5 (note %)) score))))
+(def score [:F4 :F4 :F4 :F4 :F4 :F4 :F4
+            :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4 :G4
+            :BB4 :BB4 :BB4 :BB4 :BB4 :BB4
+            :D#4 :D#4 :D#4])
 
-(buffer-write! score-b (take 128 (cycle (map #(+ 0 ( note %)) score))))
+(def bass-score [:F2 :F2 :G3 :G2 :G3 :BB2 :BB2 :G2 :G2])
 
-(Buffer-write! duration-b (take 128 (cycle duration)))
+(def duration   [1/7])
+
+(def score (concat
+            (map #(+ -5  (note %)) score)
+            (map #(+ -5  (note %)) score)
+            (map #(+ -10 (note %)) score)
+            (map #(+ -5  (note %)) score)
+            (map #(+ -1  (note %)) score)))
+
+(buffer-write! bass-duration-b (take 128 (cycle [(/ 1 3.5)])))
+(buffer-write! bass-notes-b    (take 128 (cycle (map note bass-score))))
+(buffer-write! bass-notes-b    (take 128 (cycle (map #(+ -12 (note %)) score))))
+
+(buffer-write! score-b    (take 128 (cycle (map #(+ 0 ( note %)) score))))
+(buffer-write! duration-b (take 128 (cycle duration)))
 
 (ctl root-trigger :rate 100)
 (ctl beat-trigger :div 29)

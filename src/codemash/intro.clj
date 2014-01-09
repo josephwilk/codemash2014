@@ -1,4 +1,7 @@
 (ns codemash.intro
+  ;;http://bit.ly/K838FR
+  ;;git clone https://github.com/josephwilk/welcome-to-the-world-of-sound.git
+
   "88        88              88  88                                                    88
    88        88              88  88                                                    88
    88        88              88  88                                                    88
