@@ -51,13 +51,7 @@
 
 (do (voice/synthesis))
 
-(defsynth wallop [freq 300]
-  (let [tri (lf-tri freq)
-        sin1 (* 1 (sin-osc freq))
-        sin2 (* 1.1 (sin-osc freq))
-        src (mix [tri sin1 sin2])
-        env (env-gen (perc :attack 0 :release 0.25))]
-    (out 0 (pan2 (* env src)))))
+(defsynth wallop [])
 
 (show-graphviz-synth wallop)
 
@@ -76,16 +70,6 @@
 (do
   (voice/ugens)
   (println art/sweet-shop))
-
-(defsynth ding [freq 880 dur 0.2 level 0.25 pan 0.0 out-bus 0]
-  (let [amp  (env-gen:ar (env-perc) :action FREE :time-scale dur)
-        snd (* (sin-osc:ar freq ) amp level)]
-    (out out-bus (pan2:ar snd pan))))
-
-(defsynth tick [freq 880 dur 0.1 level 0.25 pan 0.0 out-bus 0]
-  (let [amp (env-gen (env-perc) :action FREE :time-scale dur)
-        snd (lpf:ar (white-noise:ar) freq)]
-    (out out-bus (pan2:ar (* snd amp level) pan))))
 
 (defsynth woody-beep [freq 300 out-bus 0 dur 0.4]
   (let [tri (* 0.5 (lf-tri:ar freq))
@@ -116,6 +100,7 @@
 (tick)
 
 (kill fallout-wind)
+
 ;;;;;;;;;;;
 ;;Samples;;
 ;;;;;;;;;;;
@@ -127,8 +112,6 @@
 (def clap (freesound 48310))
 (def clap2 (freesound 132676))
 
-(def waves-s (sample (freesound-path 48412)))
-(def waves (waves-s :rate 0.3 :vol 0.5))
 (def waves-s (freesound-sample 163120))
 (def waves (waves-s :rate 0.8 :vol 0.5))
 (ctl waves :rate 1)
@@ -406,13 +389,13 @@
 (ctl ps :amp 1)
 (kill ps)
 
-(buffer-write! bass-duration-b (take 128 (cycle [(/ 1 0.87)])))
-(buffer-write! bass-notes-b (take 128 (cycle (map note [:F2 :F2 :G2 :G2 :F2 :F2]))))
-
+(buffer-write! bass-duration-b (take 128 (cycle [(/ 1 7)])))
+(buffer-write! bass-notes-b (take 128 (cycle (map note bass-score))))
 (buffer-write! bass-notes-b (take 128 (cycle (map #(+ -5 (note %)) score))))
 
-(buffer-write! score-b (take 128 (cycle (map note score))))
-(buffer-write! duration-b (take 128 (cycle duration)))
+(buffer-write! score-b (take 128 (cycle (map #(+ 0 ( note %)) score))))
+
+(Buffer-write! duration-b (take 128 (cycle duration)))
 
 (ctl root-trigger :rate 100)
 (ctl beat-trigger :div 29)
@@ -480,4 +463,4 @@
 (do
   (voice/the-end)
   (println art/end)
-)
+))
