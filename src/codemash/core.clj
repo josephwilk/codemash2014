@@ -30,11 +30,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 (do (voice/waves) (println art/waves))
 
-(demo (sin-osc)) (println art/sin-waves)
-(demo (lf-saw))  (println art/saw-waves)
-(demo (lf-tri))  (println art/triangle-waves)
-(demo (pulse))   (println art/pulse-waves)
-(demo (square))
+(do (demo (sin-osc)) (println art/sin-waves))
+(do (demo (lf-saw))  (println art/saw-waves))
+(do (demo (lf-tri))  (println art/triangle-waves))
+(do (demo (pulse))   (println art/square-waves))
+(do (demo (square))  (println art/square-waves))
 
 (stop)
 
@@ -83,7 +83,10 @@
     (out:ar out-bus  (* (mix:ar fillers)
                   (env-gen:kr (perc attack decay) :action FREE)))))
 
-(fallout-wind)
+(def fallout-w (fallout-wind))
+
+(ctl fallout-w :attack 1 :decay 1)
+
 (woody-beep :freq 400)
 
 (kill woody-beep)
@@ -104,8 +107,18 @@
 
 (def waves-s (freesound-sample 163120))
 (def waves (waves-s :rate 0.8 :vol 0.5))
-(ctl waves :rate 1)
+(def birds-s (freesound-sample 184870))
+(def birds (birds-s :rate 0.2))
+(def bubbles-s (freesound-sample 104950))
+(def bubbles (bubbles-s))
+(def wind ((freesound-sample 81188)))
+
+(ctl birds :rate -1)
+(ctl waves :rate -1)
+
 (kill waves)
+(kill birds)
+(stop)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Busses - Wiring synths ;;
@@ -238,7 +251,7 @@
 (def kicks
   (doall
    (for [x (range 8)]
-     (mono-sequencer [:tail beats-g] :buf beatbox-kick-s :beat-num x
+     (mono-sequencer [:tail beats-g] :buf kick-s :beat-num x :vol 0.8
                      :sequencer kick-sequencer-buffer))))
 
 (buffer-write! kick-sequencer-buffer [1 0 0 0 0 1 0 0])
@@ -249,7 +262,10 @@
 (def toms
   (doall
    (for [x (range 8)]
-     (mono-sequencer [:tail beats-g] :buf tom-s :beat-num x
+     (mono-sequencer [:tail beats-g]
+                     :amp 0.5
+                     :buf tom-s
+                     :beat-num x
                      :sequencer tom-sequencer-buffer))))
 
 (defonce shake-sequencer-buffer (buffer 8))
@@ -301,7 +317,7 @@
 (defonce bass-duration-b (buffer 128))
 (defonce bass-notes-b    (buffer 128))
 
-(defsynth woody-beep [duration-bus 0 room 1 damp 1 beat-count-bus 0 offset-bus 0 amp 1 out-bus 0]
+(defsynth woody-beep [duration-bus 0 room 0.5 damp 0.5 beat-count-bus 0 offset-bus 0 amp 1 out-bus 0]
   (let [cnt    (in:kr beat-count-bus)
         offset (buf-rd:kr 1 offset-bus cnt)
         durs   (buf-rd:kr 1 duration-bus cnt)
@@ -315,10 +331,10 @@
         sin2 (sin-osc:ar (* 1.01 freq))
         wood (bpf:ar (* (white-noise:ar) (line:kr 5 0 0.02)) freq 0.02)
         src (mix [sin sin2 tri wood])
-        src (free-verb src 1 room damp)]
+        src (free-verb src 0.33 room damp)]
     (out:ar out-bus (* amp env (pan2 src)))))
 
-(defsynth deep-saw [freq 100 beat-count-bus 0 offset-bus 0 duration-bus 0 out-bus 0 amp 1 pan 0]
+(defsynth deep-saw [freq 100 beat-count-bus 0 offset-bus 0 duration-bus 0 out-bus 0 amp 1 pan 0 room 0.5 damp 0.5]
   (let [cnt    (in:kr beat-count-bus)
         offset (buf-rd:kr 1 offset-bus cnt)
         durs   (buf-rd:kr 1 duration-bus cnt)
@@ -333,18 +349,21 @@
         src (mix [saw1 saw2 sin1 sin2])
         env (env-gen:ar (env-asr) trig)
         src (lpf:ar src)
-        src (free-verb :in src :mix 0.33 :room 0.5 :damp 0.5)]
+        src (free-verb :in src :mix 0.33 :room room :damp damp)]
     (out out-bus (* amp [src src]))))
 
-(def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 5))
+(def w  (woody-beep :duration-bus duration-b :beat-count-bus beat-count-bus :offset-bus score-b :amp 6))
 
 ;;(kill woody-beep)
-(ctl w :damp 1)
+;;(kill deep-saw)
+(ctl w :damp 0.5)
 (ctl w :room 0.5)
 
 (def ps (deep-saw 100 :duration-bus bass-duration-b :beat-count-bus beat-count-bus :offset-bus bass-notes-b :amp 0.8))
 
 (ctl ps :amp 1)
+(ctl ps :damp 3)
+(ctl ps :room 3)
 (kill ps)
 
 (def score [:F4 :F4 :F4 :F4 :F4 :F4 :F4
@@ -357,8 +376,10 @@
 (def duration   [1/7])
 
 (buffer-write! bass-duration-b (take 128 (cycle [(/ 1 3.5)])))
-(buffer-write! bass-notes-b    (take 128 (cycle (map note bass-score))))
-(buffer-write! bass-notes-b    (take 128 (cycle (map #(+ -12 (note %)) score))))
+(buffer-write! bass-notes-b
+               (take 128 (cycle (map note bass-score))))
+(buffer-write! bass-notes-b
+               (take 128 (cycle (map #(+ -12 (note %)) score))))
 
 (buffer-write! score-b    (take 128 (cycle (map #(+ 0 ( note %)) n-score))))
 (buffer-write! duration-b (take 128 (cycle duration)))
@@ -404,3 +425,4 @@
 ;;Go forth and make sounds ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (do (voice/the-end) (println art/end))
+(stop)
