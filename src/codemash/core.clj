@@ -30,10 +30,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 (do (voice/waves) (println art/waves))
 
-(demo (sin-osc))
-(demo (lf-saw))
-(demo (lf-tri))
-(demo (pulse))
+(demo (sin-osc)) (println art/sin-waves)
+(demo (lf-saw))  (println art/saw-waves)
+(demo (lf-tri))  (println art/triangle-waves)
+(demo (pulse))   (println art/pulse-waves)
 (demo (square))
 
 (stop)
