@@ -1,8 +1,6 @@
 # Welcome to the world of SOUND
 
-HELLO!
-
-###codemash
+###CodeMash 2014
 
 HELLO and welcome to the wonderful world of SOUND.
 
