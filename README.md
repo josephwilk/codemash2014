@@ -1,5 +1,7 @@
 # Welcome to the world of SOUND
 
+![](http://www.irishacoustics.com/wp-content/uploads/2010/08/SoundwavesauiDetail.png)
+
 ###CodeMash 2014
 
 HELLO and welcome to the wonderful world of SOUND.
