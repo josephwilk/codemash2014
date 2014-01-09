@@ -29,9 +29,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;     Waves           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
-(do
-  (voice/waves)
-  (println art/waves))
+(do (voice/waves) (println art/waves))
 
 (demo (sin-osc))
 (demo (lf-saw))
@@ -48,7 +46,6 @@
 ;; * Additive                       ;;
 ;; * Subtractive                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (do (voice/synthesis))
 
 (defsynth wallop [])
@@ -66,10 +63,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; * Cheat sheet:
 ;;     - https://github.com/overtone/overtone/raw/master/docs/cheatsheet/overtone-cheat-sheet.pdf
-
-(do
-  (voice/ugens)
-  (println art/sweet-shop))
+(do (voice/ugens) (println art/sweet-shop))
 
 (defsynth woody-beep [freq 300 out-bus 0 dur 0.4]
   (let [tri (* 0.5 (lf-tri:ar freq))
@@ -104,10 +98,7 @@
 ;;;;;;;;;;;
 ;;Samples;;
 ;;;;;;;;;;;
-
-(do
-  (println art/samples)
-  (voice/samples))
+(do (println art/samples) (voice/samples))
 
 (def clap (freesound-sample 48310))
 (def clap2 (freesound-sample 132676))
@@ -120,10 +111,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Busses - Wiring synths ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(do
-  (println art/busses)
-  (voice/busses))
+(do (println art/busses) (voice/busses))
 
 ;;Audio busses are just ids preallocated at boot.
 (defonce tri-bus (audio-bus "triangle bus"))
@@ -157,10 +145,7 @@
 ;;;;;;;;;;;;;;;
 ;;Instruments;;
 ;;;;;;;;;;;;;;;
-
-(do
-  (println art/instrument)
-  (voice/instruments))
+(do (println art/instrument) (voice/instruments))
 
 ;;Sampled
 (comment (require '[overtone.inst.sampled-piano :as s-piano]))
@@ -180,10 +165,7 @@
 ;;;;;;;;;;
 ;;Timing;;
 ;;;;;;;;;;
-
-(do
-  (voice/timing)
-  (println art/time))
+(do (voice/timing) (println art/time))
 
 (defonce timing-g (group "codemash timing" :tgt (foundation-safe-pre-default-group)))
 
@@ -228,9 +210,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Building Sequencer with buffers;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(do
-  (voice/buffers)
-  (println art/buffers))
+(do (voice/buffers) (println art/buffers))
 
 (def sample-root "~/Workspace/music/samples/sliced-p5/")
 (def beats-g (group "beats"))
@@ -263,7 +243,6 @@
                      :sequencer kick-sequencer-buffer))))
 
 (buffer-write! kick-sequencer-buffer [1 0 0 0 0 1 0 0])
-(buffer-write! kick-sequencer-buffer [1 0 0 0 0 1 1 0])
 
 (defonce tom-sequencer-buffer (buffer 8))
 (defonce tom-s (load-sample (str sample-root "tom.aif")))
@@ -306,20 +285,17 @@
    (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf shake1-s :beat-num x
                      :sequencer shake1-sequencer-buffer))))
 
-(buffer-write! kick-sequencer-buffer    [1 0 0 0 0 1 0 0])
-(buffer-write! tom-sequencer-buffer     [0 0 1 0 0 0 1 0])
-(buffer-write! shake-sequencer-buffer   [0 1 0 0 0 0 0 0])
+(buffer-write! kick-sequencer-buffer    [0 0 0 0 0 0 0 0])
+(buffer-write! tom-sequencer-buffer     [0 0 0 0 0 0 0 0])
+(buffer-write! shake-sequencer-buffer   [0 0 0 0 0 0 0 0])
 (buffer-write! shake2-sequencer-buffer  [0 0 0 0 0 0 0 0])
-(buffer-write! shake2d-sequencer-buffer [0 0 0 0 0 0 0 1])
-(buffer-write! shake1-sequencer-buffer  [0 0 0 0 1 0 0 0])
+(buffer-write! shake1-sequencer-buffer  [0 0 0 0 0 0 0 0])
+(buffer-write! shake2d-sequencer-buffer [0 0 0 0 0 0 0 0])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Playing notes with buffers ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(do
-  (println art/notes)
-  (voice/notes-buffers))
+(do (println art/notes) (voice/notes-buffers))
 
 (defonce score-b         (buffer 128))
 (defonce duration-b      (buffer 128))
@@ -381,13 +357,6 @@
 
 (def duration   [1/7])
 
-(def score (concat
-            (map #(+ -5  (note %)) score)
-            (map #(+ -5  (note %)) score)
-            (map #(+ -10 (note %)) score)
-            (map #(+ -5  (note %)) score)
-            (map #(+ -1  (note %)) score)))
-
 (buffer-write! bass-duration-b (take 128 (cycle [(/ 1 3.5)])))
 (buffer-write! bass-notes-b    (take 128 (cycle (map note bass-score))))
 (buffer-write! bass-notes-b    (take 128 (cycle (map #(+ -12 (note %)) score))))
@@ -401,10 +370,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Hardware (External devices);;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(do
-  (println art/hardware)
-  (voice/hardware))
+(do (println art/hardware) (voice/hardware))
 
 (midi-connected-devices)
 
@@ -432,25 +398,6 @@
 
 (spacey)
 (kill spacey)
-
-;; Improv
-
-(defonce clap-sequencer-buffer (buffer 8))
-(def claps
-  (doall
-   (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf clap2 :beat-num x
-                                      :sequencer clap-sequencer-buffer))))
-
-(buffer-write! clap-sequencer-buffer [1 0 0 0 0 0 0 0])
-
-(defonce clap1-sequencer-buffer (buffer 8))
-(def claps
-  (doall
-   (for [x (range 8)] (mono-sequencer [:tail beats-g] :buf clap :beat-num x
-                                      :sequencer clap1-sequencer-buffer))))
-
-(buffer-write! clap1-sequencer-buffer [0 0 0 0 0 0 0 1])
-
 
 ;(stop)
 
