@@ -35,9 +35,9 @@
 
 (demo (sin-osc))
 (demo (lf-saw))
+(demo (lf-tri))
 (demo (pulse))
 (demo (square))
-(demo (lf-tri))
 
 (stop)
 
@@ -51,7 +51,6 @@
 
 (do (voice/synthesis))
 
-;; play{d=Duty;f=d.kr(1/[1,2,4],0,Dseq([0,3,7,12,17]+24,inf));GVerb.ar(Blip.ar(f.midicps*[1,4,8],LFNoise1.kr(1/4,3,4)).sum,200,8)}
 
 (defsynth wallop [freq 300  amp 1]
   (let [sin1 (sin-osc freq)
@@ -104,6 +103,16 @@
         env (env-gen:ar (env-perc :release 0.25) :action FREE :time-scale dur)]
     (out out-bus (pan2 (* env src)))))
 
+;; Based on Dawn by Schemawound: http://sccode.org/1-c
+(defsynth fallout-wind [decay 30 attack 30 out-bus 0]
+  (let [lfo  (+ 0.5 (* 0.5 (sin-osc:kr [(ranged-rand 0.5 1000) (ranged-rand 0.5 1000)] :phase (* 1.5 Math/PI))))
+        lfo3 (+ 0.5 (* 0.5 (sin-osc:kr [(ranged-rand 0.1 0.5) (ranged-rand 0.1 0.5)] :phase (* 1.5 Math/PI))))
+        lfo2 (+ 0.5 (* 0.5 (sin-osc:kr [(* (ranged-rand 0.5 1000) lfo lfo3) (* (ranged-rand 0.5 1000) (- 1 lfo) (- 1 lfo3))] :phase (* 1.5 Math/PI))))
+        fillers (map (fn [_] (* lfo2 (sin-osc:ar (ranged-rand 40 1000) :phase 0))) (range 0 100))]
+    (out:ar out-bus  (* (mix:ar fillers)
+                  (env-gen:kr (perc attack decay) :action FREE)))))
+
+(fallout-wind)
 (woody-beep :freq 400)
 
 (kill woody-beep)
@@ -125,6 +134,9 @@
 
 (def waves-s (sample (freesound-path 48412)))
 (def waves (waves-s :rate 0.3 :vol 0.5))
+(def waves-s (freesound-sample 163120))
+(def waves (waves-s :rate 0.8 :vol 0.5))
+(ctl waves :rate 1)
 (kill waves)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -157,10 +169,10 @@
   (let [freq (+ mid-freq (* (in:kr freq-bus) freq-amp))]
     (out 0 (pan2 (lf-tri freq)))))
 
-(def mft (modulated-freq-tri [:tail late-g] sin-bus))
+(def mft (modulated-freq-tri [:tail late-g] :freq-bus sin-bus))
 
 (ctl mft :freq-bus tri-bus)
-(ctl tri-synth-inst :freq 1)
+(ctl tri-synth-inst :freq 0.2)
 
 (kill mft)
 
@@ -173,10 +185,8 @@
   (voice/instruments))
 
 ;;Sampled
-(comment (require 'overtone.inst.sampled-piano))
+(comment (require '[overtone.inst.sampled-piano :as s-piano]))
 (require '[overtone.inst.piano :as piano])
-
-(require '[overtone.inst.sampled-piano :as s-piano])
 
 (piano/piano :note 50)
 (s-piano/sampled-piano :note 50)
@@ -244,7 +254,8 @@
 (def kick-s (load-sample "~/Workspace/music/samples/sliced-p5/kick.aif"))
 
 (defonce kick-sequencer-buffer (buffer 8))
-(buffer-get kick-sequencer-buffer 7)
+
+(buffer-get kick-sequencer-buffer 0)
 
 (sample-player kick-s)
 
@@ -440,7 +451,7 @@
 (spacey)
 (kill spacey)
 
-;; Extra Tweaks
+;; Improv
 
 (defonce clap-sequencer-buffer (buffer 8))
 
