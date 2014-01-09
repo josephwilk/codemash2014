@@ -1,4 +1,5 @@
 (ns codemash.voice
+  "Randomly pick voices for each intro section"
   (:use [overtone.live]))
 
 (def voices [:agnes :albert :alex :bad-news :bahh  :bells :boing :bruce :bubbles :cellos :deranged :fred :good-news :hysterical :junior :kathy :pipe-organ

@@ -1,8 +1,10 @@
 (ns codemash.kit
   "HERE LIES DEMONS.
+  
+   This setups a nanokontrol and a launchpad (linking the two through busses).
 
- This is a mash of config and setup taken from:
-https://github.com/stars-my-destination/cassiopeia
+   The config and setup is extracted from:
+   https://github.com/stars-my-destination/cassiopeia
 "
   (:use [overtone.live]
         [overtone.helpers.lib :only [uuid]]
