@@ -55,7 +55,9 @@
 
 (ctl p :freq 200 :amp 0.1)
 (ctl p :freq 250)
+(ctl p :freq 300)
 (kill p)
+(stop)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;UGENS - Unit generators (Sweet shop);;
@@ -81,7 +83,7 @@
         lfo2 (+ 0.5 (* 0.5 (sin-osc:kr [(* (ranged-rand 0.5 1000) lfo lfo3) (* (ranged-rand 0.5 1000) (- 1 lfo) (- 1 lfo3))] :phase (* 1.5 Math/PI))))
         fillers (map (fn [_] (* lfo2 (sin-osc:ar (ranged-rand 40 1000) :phase 0))) (range 0 100))]
     (out:ar out-bus  (* (mix:ar fillers)
-                  (env-gen:kr (perc attack decay) :action FREE)))))
+                        (env-gen:kr (perc attack decay) :action FREE)))))
 
 (def fallout-w (fallout-wind))
 
@@ -106,9 +108,9 @@
 (def clap2-s (freesound-sample 132676))
 
 (def waves-s (freesound-sample 163120))
-(def waves (waves-s :rate 0.8 :vol 0.5))
+(def waves (waves-s :rate 0.8 :vol 0.5 :loop? 1))
 (def birds-s (freesound-sample 184870))
-(def birds (birds-s :rate 0.2))
+(def birds (birds-s :rate 0.2 :loop? 1))
 (def bubbles-s (freesound-sample 104950))
 (def bubbles (bubbles-s))
 (def wind ((freesound-sample 81188)))
@@ -248,6 +250,7 @@
      out-bus (* vol
                 amp
                 (scaled-play-buf 1 buf rate bar-trg)))))
+
 (def kicks
   (doall
    (for [x (range 8)]
@@ -364,6 +367,7 @@
 (ctl ps :amp 1)
 (ctl ps :damp 3)
 (ctl ps :room 3)
+
 (kill ps)
 
 (def score [:F4 :F4 :F4 :F4 :F4 :F4 :F4
@@ -381,8 +385,11 @@
 (buffer-write! bass-notes-b
                (take 128 (cycle (map #(+ -12 (note %)) score))))
 
-(buffer-write! score-b    (take 128 (cycle (map #(+ 0 ( note %)) n-score))))
-(buffer-write! duration-b (take 128 (cycle duration)))
+(buffer-write! score-b
+               (take 128 (cycle (map #(+ 0 ( note %)) score))))
+
+(buffer-write! duration-b
+               (take 128 (cycle [1/7])))
 
 (ctl root-trigger :rate 100)
 (ctl beat-trigger :div 29)

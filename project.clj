@@ -7,7 +7,8 @@
                  [overtone "0.9.1"]
                  [incanter "1.5.4"]
                  [polynome "0.3.0-SNAPSHOT"]
-                 [shadertone "0.2.2"]
+;;                 [shadertone "0.2.2"]
+                  [shadertone "0.2.1"]
                  [korg-nano-kontrol2 "0.1.0-SNAPSHOT"]
                  [launchpad "0.1.0-SNAPSHOT"]]
 
