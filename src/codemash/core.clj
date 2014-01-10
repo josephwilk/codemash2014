@@ -256,7 +256,7 @@
 (def kicks
   (doall
    (for [x (range 8)]
-     (mono-sequencer [:tail beats-g] :buf kick-s :beat-num x :vol 0.8
+     (mono-sequencer [:tail beats-g] :buf beatbox-kick-s :beat-num x :vol 0.8
                      :sequencer kick-sequencer-buffer))))
 
 (buffer-write! kick-sequencer-buffer [1 0 0 0 0 1 0 0])
