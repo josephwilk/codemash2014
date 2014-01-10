@@ -228,6 +228,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (do (voice/buffers) (println art/buffers))
 
+;;Samples from https://github.com/stars-my-destination/samples/tree/master/sliced-p5
+;;Clone and point this def to where you cloned them
 (def sample-root "~/Workspace/music/samples/sliced-p5/")
 (def beats-g (group "beats"))
 
