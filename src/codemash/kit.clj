@@ -508,7 +508,7 @@
 
 (ctl seq-mix-s64 :mute 1)
 
-(def sample-selection [voice-1-s voice-2-s strings-s chords-s dub-s bass-1-s bass-2-s bass-3-s hard-1-s hard-2-s hard-3])
+(def sample-selection [voice-1-s voice-2-s strings-s chords-s dub-s bass-1-s bass-2-s bass-3-s hard-1-s hard-2-s])
 
 (def seq-mixers (vec (doall (map-indexed (fn [idx _] (add-nk-mixer (nk-bank :lp64) (str "lp64-seq-" idx) seq-mixer-group lp64-b)) sample-selection))))
 
