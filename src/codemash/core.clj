@@ -115,6 +115,8 @@
 (def bubbles (bubbles-s))
 (def wind ((freesound-sample 81188)))
 
+(def monkeys ((freesound-sample 93993)))
+
 (ctl birds :rate -1)
 (ctl waves :rate -1)
 
